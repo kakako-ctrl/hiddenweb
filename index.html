@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hidden Web</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap');
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: black; /* Changed to black */
+            color: #e60000; /* Glowing red for text */
+            overflow-x: hidden;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 3em;
+            color: #e60000;
+            text-shadow: 0 0 10px #fff, 0 0 20px #e60000; /* Glowing red */
+            animation: snowfall 10s linear infinite;
+            font-family: 'Great Vibes', cursive;
+            margin-top: 50px;
+        }
+
+        /* Snowflake animation */
+        @keyframes fall {
+            0% {
+                transform: translateY(-100px);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(100vh);
+                opacity: 0;
+            }
+        }
+
+        .snow {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1000;
+            overflow: hidden;
+        }
+
+        .snowflake {
+            position: absolute;
+            top: -50px;
+            width: 5px;
+            height: 5px;
+            background-color: white;
+            border-radius: 50%;
+            opacity: 0.5;
+            animation: fall linear infinite;
+            box-shadow: 0 0 5px #fff, 0 0 10px #e60000; /* Glowing effect */
+        }
+
+        .tab {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .tab button {
+            margin: 0 10px;
+            padding: 10px 20px;
+            font-size: 1em;
+            cursor: pointer;
+            background-color: #e60000;
+            border: 1px solid #e60000;
+            color: white;
+            border-radius: 5px;
+        }
+
+        .tab button:hover {
+            background-color: #fff;
+            color: black;
+        }
+
+        .content {
+            display: none;
+            margin: 20px;
+            text-align: center;
+        }
+
+        .content.active {
+            display: block;
+        }
+
+        #notepad {
+            width: 80%;
+            height: 200px;
+            border: 1px solid #e60000;
+            background-color: #333; /* Dark background */
+            color: #e60000;
+            padding: 10px;
+            margin-top: 20px;
+            font-size: 1.2em;
+            border-radius: 5px;
+        }
+
+        #notes-list {
+            margin-top: 20px;
+            text-align: left;
+        }
+
+        .note-item {
+            border: 1px solid #e60000;
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 5px;
+            background-color: #333; /* Dark background */
+            color: #e60000;
+        }
+
+        .note-item h3 {
+            margin: 0;
+        }
+
+        .note-item p {
+            margin: 5px 0;
+        }
+
+        .like-btn {
+            cursor: pointer;
+            color: #e60000;
+            font-size: 1.2em;
+        }
+
+        #login-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            color: #e60000;
+        }
+
+        #login-container input {
+            margin: 10px;
+            padding: 10px;
+            width: 200px;
+            border: 1px solid #e60000;
+            background-color: #333;
+            color: #e60000;
+        }
+
+        #login-container button {
+            padding: 10px 20px;
+            background-color: #e60000;
+            color: white;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+        }
+
+        #login-container button:hover {
+            background-color: white;
+            color: black;
+        }
+
+        #error-message {
+            color: red;
+            font-size: 1.2em;
+            margin-top: 10px;
+        }
+
+        /* Logo style */
+        #logo {
+            display: block;
+            margin: 0 auto;
+            width: 100px; /* Adjust the size as needed */
+            height: auto;
+            margin-top: 20px;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="snow"></div>
+    
+    <!-- Logo section -->
+    <img id="logo" src="logo.png" alt="Hidden Web Logo" />
+
+    <h1>𝐻𝒾𝒹𝒹𝑒𝓃 𝓌𝑒𝒷</h1>
+
+    <div id="login-container">
+        <input type="text" id="login-username" placeholder="Username" />
+        <input type="password" id="login-password" placeholder="Password" />
+        <button onclick="login()">Log In</button>
+        <p id="error-message"></p>
+    </div>
+
+    <div class="tab hidden">
+        <button onclick="showTab('create-note')">Create Notepad</button>
+        <button onclick="showTab('view-notes')">View Notes</button>
+    </div>
+
+    <!-- Create Notepad Section -->
+    <div id="create-note" class="content">
+        <textarea id="notepad" placeholder="Write your note here..."></textarea><br>
+        <button onclick="saveNote()">Save Note</button>
+    </div>
+
+    <!-- View Notes Section -->
+    <div id="view-notes" class="content">
+        <div id="notes-list">
+            <p>No notes created yet.</p>
+        </div>
+    </div>
+
+    <script>
+        let notes = JSON.parse(localStorage.getItem('notes')) || [];
+        let likedNotes = JSON.parse(localStorage.getItem('likedNotes')) || [];
+        let username = '';
+        let isAdmin = false;
+
+        // Admin credentials
+        const adminUsername = 'admin';
+        const adminPassword = 'fahoody001';
+
+        // Function to log in
+        function login() {
+            username = document.getElementById('login-username').value;
+            const password = document.getElementById('login-password').value;
+            const errorMessage = document.getElementById('error-message');
+
+            if (username === adminUsername && password === adminPassword) {
+                isAdmin = true;
+                document.querySelector('#login-container').style.display = 'none';
+                document.querySelector('.tab').classList.remove('hidden');
+                renderNotes();
+            } else if (username !== '' && password !== '' && username !== adminUsername) {
+                isAdmin = false;
+                document.querySelector('#login-container').style.display = 'none';
+                document.querySelector('.tab').classList.remove('hidden');
+                renderNotes();
+            } else {
+                errorMessage.textContent = 'Invalid user or password. Try again.';
+            }
+        }
+
+        // Function to switch tabs
+        function showTab(tabId) {
+            document.querySelectorAll('.content').forEach(content => {
+                content.classList.remove('active');
+            });
+            document.getElementById(tabId).classList.add('active');
+        }
+
+        // Function to save a note
+        function saveNote() {
+            const noteContent = document.getElementById('notepad').value;
+            const timestamp = new Date().toLocaleString();
+
+            if (noteContent.trim() === '') {
+                alert('Note cannot be empty!');
+                return;
+            }
+
+            const note = {
+                username: username || 'Anonymous', // Use logged-in username or "Anonymous"
+                content: noteContent,
+                timestamp,
+                views: 0,
+                likes: 0,
+                liked: false,
+                viewed: false
+            };
+
+            notes.push(note);
+            localStorage.setItem('notes', JSON.stringify(notes));  // Save to localStorage
+            document.getElementById('notepad').value = '';
+            renderNotes();
+            alert('Note saved successfully!');
+        }
+
+        // Function to render notes
+        function renderNotes() {
+            const notesList = document.getElementById('notes-list');
+            notesList.innerHTML = '';
+
+            notes.forEach((note, index) => {
+                const noteItem = document.createElement('div');
+                noteItem.classList.add('note-item');
+                noteItem.innerHTML = `
+                    <h3>Note by: ${note.username}</h3>
+                    <p>${note.content}</p>
+                    <p><strong>Created on:</strong> ${note.timestamp}</p>
+                    <p><strong>Views:</strong> ${note.views} | <strong>Likes:</strong> ${note.likes} 
+                    <span class="like-btn" onclick="likeNote(${index})" ${note.liked ? 'disabled' : ''}>&#128077;</span></p>
+                    <p><span class="view-btn" onclick="incrementViews(${index})" ${note.viewed ? 'disabled' : ''}>👁️ View</span></p>
+                    ${isAdmin ? `<button onclick="deleteNote(${index})">Delete</button>` : ''}
+                `;
+                notesList.appendChild(noteItem);
+            });
+
+            if (notes.length === 0) {
+                notesList.innerHTML = '<p>No notes created yet.</p>';
+            }
+        }
+
+        // Function to increment views (view counts when liked)
+        function incrementViews(index) {
+            if (notes[index].viewed) return;
+            notes[index].views += 1;
+            notes[index].viewed = true;
+            localStorage.setItem('notes', JSON.stringify(notes)); // Update localStorage
+            renderNotes();
+        }
+
+        // Function to like a note
+        function likeNote(index) {
+            if (notes[index].liked) return;
+            notes[index].likes += 1;
+            notes[index].liked = true;
+            notes[index].views += 1;  // Automatically increment view count when liked
+            likedNotes.push(index);  // Track liked notes
+            localStorage.setItem('notes', JSON.stringify(notes)); // Update localStorage
+            localStorage.setItem('likedNotes', JSON.stringify(likedNotes)); // Update liked notes in localStorage
+            renderNotes();
+        }
+
+        // Function to delete a note (admin only)
+        function deleteNote(index) {
+            if (!isAdmin) return;
+            notes.splice(index, 1);
+            localStorage.setItem('notes', JSON.stringify(notes)); // Update localStorage
+            renderNotes();
+        }
+
+        // Snowflake effect
+        function createSnowflakes() {
+            const snowContainer = document.querySelector('.snow');
+            for (let i = 0; i < 100; i++) {
+                const snowflake = document.createElement('div');
+                snowflake.classList.add('snowflake');
+                snowflake.style.left = Math.random() * 100 + 'vw'; // Random horizontal position
+                snowflake.style.animationDuration = Math.random() * 3 + 3 + 's'; // Random fall speed
+                snowflake.style.animationDelay = Math.random() * 5 + 's'; // Random start time
+                snowContainer.appendChild(snowflake);
+            }
+        }
+
+        createSnowflakes();
+    </script>
+</body>
+</html>

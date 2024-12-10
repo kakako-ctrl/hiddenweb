@@ -197,20 +197,20 @@
     </div>
 
     <div class="tab hidden">
-        <button onclick="showTab('create-note')">Create Notepad</button>
-        <button onclick="showTab('view-notes')">View Notes</button>
+        <button onclick="showTab('create-note')">LogginPin</button>
+        <button onclick="showTab('view-notes')">View Pins</button>
     </div>
 
     <!-- Create Notepad Section -->
     <div id="create-note" class="content">
         <textarea id="notepad" placeholder="Write your note here..."></textarea><br>
-        <button onclick="saveNote()">Save Note</button>
+        <button onclick="saveNote()">Save Pin</button>
     </div>
 
-    <!-- View Notes Section -->
+    <!-- View Pins Section -->
     <div id="view-notes" class="content">
         <div id="notes-list">
-            <p>No notes created yet.</p>
+            <p>No pins created yet.</p>
         </div>
     </div>
 
@@ -259,7 +259,7 @@
             const timestamp = new Date().toLocaleString();
 
             if (noteContent.trim() === '') {
-                alert('Note cannot be empty!');
+                alert('Pin cannot be empty!');
                 return;
             }
 
@@ -277,7 +277,7 @@
             localStorage.setItem('notes', JSON.stringify(notes));  // Save to localStorage
             document.getElementById('notepad').value = '';
             renderNotes();
-            alert('Note saved successfully!');
+            alert('Pin saved successfully!');
         }
 
         // Function to render notes
@@ -289,7 +289,7 @@
                 const noteItem = document.createElement('div');
                 noteItem.classList.add('note-item');
                 noteItem.innerHTML = `
-                    <h3>Note by: ${note.username}</h3>
+                    <h3>Pin by: ${note.username}</h3>
                     <p>${note.content}</p>
                     <p><strong>Created on:</strong> ${note.timestamp}</p>
                     <p><strong>Views:</strong> ${note.views} | <strong>Likes:</strong> ${note.likes} 
@@ -301,7 +301,7 @@
             });
 
             if (notes.length === 0) {
-                notesList.innerHTML = '<p>No notes created yet.</p>';
+                notesList.innerHTML = '<p>No pins created yet.</p>';
             }
         }
 
